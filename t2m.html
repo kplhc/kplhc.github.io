@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Prompt to Image Generator</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        padding: 20px;
+    }
+    #promptForm {
+        margin-bottom: 20px;
+    }
+    #promptForm label,
+    #promptForm input,
+    #promptForm button {
+        display: block;
+    }
+    #imagePreview {
+        margin-top: 20px;
+    }
+</style>
+</head>
+<body>
+    <h1>Enter Your Prompt to Generate an Image:</h1>
+    <form id="promptForm">
+        <label for="description">Prompt:</label>
+        <input type="text" id="description" name="description" placeholder="Scene Detailed %20 Adjective %20 Characters Detailed %20 Visual Style %20 Genre %20 Artist Reference" required>
+        <button type="submit">Generate Image</button>
+    </form>
+    <div id="imagePreview"></div>
+
+    <script>
+        document.getElementById('promptForm').addEventListener('submit', function(event) {
+            event.preventDefault(); // Prevent form from submitting normally
+
+            // Get the user's input
+            var promptText = encodeURIComponent(document.getElementById('description').value);
+
+            // Define the API endpoint
+            var apiUrl = 'https://image.pollinations.ai/prompt/';
+
+            // Construct the URL with the user's prompt
+            var imageUrl = apiUrl + promptText + '?width=400&height=300';
+
+            // Create an image element to hold the generated image
+            var image = document.createElement('img');
+            image.id = 'previewImage';
+            image.onload = function() {
+                // When the image loads, append it to the preview area
+                document.getElementById('imagePreview').innerHTML = '';
+                document.getElementById('imagePreview').appendChild(image);
+            };
+            image.src = imageUrl; // Start loading the image
+        });
+    </script>
+</body>
+</html>
