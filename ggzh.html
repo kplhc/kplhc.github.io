@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Search with Google</title>
+    <script>
+        function performSearch() {
+            var query = document.getElementById("searchBox").value;
+            if(query) {
+                window.location.href = "https://www.google.com/search?q=" + encodeURIComponent(query);
+            }
+        }
+    </script>
+</head>
+<body>
+    <h1>Google Search</h1>
+    <input type="text" id="searchBox" placeholder="Enter your search query">
+    <button onclick="performSearch()">Search</button>
+
+    <h2>Access Google from China</h2>
+    <p>To access Google from within China, please follow the instructions below to set up a VPN service:</p>
+    <h3>VyprVPN</h3>
+    <ol>
+        <li>Visit <a href="https://www.vyprvpn.com/zh">VyprVPN</a> and create an account.</li>
+        <li>Download and install the VyprVPN application on your device.</li>
+        <li>Log in and connect to a server outside of China.</li>
+        <li>Once connected, you can use the search box above to search on Google.</li>
+    </ol>
+    <h3>Uplinks VPN</h3>
+    <ol>
+        <li>Visit <a href="https://www.uplinks.net">Uplinks VPN</a> and create an account.</li>
+        <li>Follow the setup guide to configure the VPN on your device without the need for a client app.</li>
+        <li>Connect to a server optimized for Chinese users.</li>
+        <li>Once connected, you can use the search box above to search on Google.</li>
+    </ol>
+</body>
+</html>
