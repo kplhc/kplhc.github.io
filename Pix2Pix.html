@@ -1,0 +1,28 @@
+  <!DOCTYPE html>
+<html>
+<head>
+  <title>Image-to-Image Translation</title>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@3.13.0/dist/tf.min.js"></script>
+</head>
+<body>
+  <input type="file" id="input-image" />
+  <button id="translate-button">Translate</button>
+  <div id="output-container">
+    <img id="output-image" src="" alt="Output Image">
+  </div>
+
+  <script>
+    const inputImage = document.getElementById("input-image");
+    const translateButton = document.getElementById("translate-button");
+    const outputImage = document.getElementById("output-image");
+
+    translateButton.addEventListener("click", async () => {
+      const model = await tf.loadModel("https://example.com/model.json");
+      const inputTensor = tf.tensor3d(inputImage.files[0], [1, 256, 256, 3]);
+      const outputTensor = model.predict(inputTensor);
+      const outputImageURL = await tf.toCanvas(outputTensor);
+      outputImage.src = outputImageURL;
+    });
+  </script>
+</body>
+</html>
