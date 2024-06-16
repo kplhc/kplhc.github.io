@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Image Generator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+        }
+        h1 {
+            color: #333;
+        }
+        input, button {
+            padding: 10px;
+            margin: 5px;
+            font-size: 16px;
+        }
+        img {
+            margin-top: 20px;
+            max-width: 100%;
+            max-height: 500px;
+        }
+    </style>
+</head>
+<body>
+    <h1>AI Image Generator</h1>
+    <input type="text" id="prompt" placeholder="Enter a description">
+    <button onclick="generateImage()">Generate</button>
+    <br>
+    <img id="result" src="" alt="Generated Image" style="display:none;">
+
+    <script>
+        async function generateImage() {
+            const prompt = document.getElementById('prompt').value;
+            if (!prompt) {
+                alert('Please enter a description');
+                return;
+            }
+
+            const response = await fetch(`/prompt/${encodeURIComponent(prompt)}`);
+            if (!response.ok) {
+                alert('Failed to generate image');
+                return;
+            }
+
+            const blob = await response.blob();
+            const url = URL.createObjectURL(blob);
+            const resultImg = document.getElementById('result');
+            resultImg.src = url;
+            resultImg.style.display = 'block';
+        }
+    </script>
+</body>
+</html>
