@@ -1,0 +1,557 @@
+<html><head><base href="https://example.com/ai-roleplay/">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI角色扮演与图像生成助手</title>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+body {
+  font-family: 'Roboto', sans-serif;
+  margin: 0;
+  padding: 0;
+  background-image: url('https://source.unsplash.com/random/1920x1080?nature');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+}
+.app-container {
+  max-width: 800px;
+  margin: 20px auto;
+  padding: 20px;
+  background-color: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 40px);
+}
+.app-header {
+  font-size: 24px;
+  font-weight: 500;
+  text-align: center;
+  padding: 20px 0;
+  color: #1a73e8;
+}
+.character-card {
+  background-color: rgba(232, 240, 254, 0.8);
+  border-radius: 8px;
+  padding: 15px;
+  margin-bottom: 20px;
+  transition: max-height 0.3s ease-out;
+  overflow: hidden;
+}
+.character-card.collapsed {
+  max-height: 60px;
+}
+.character-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+}
+.character-card-title {
+  font-size: 18px;
+  font-weight: 500;
+}
+.character-card-toggle {
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+}
+.character-card-content {
+  margin-top: 15px;
+}
+.tab {
+  overflow: hidden;
+  border: 1px solid #ccc;
+  background-color: rgba(241, 241, 241, 0.8);
+  border-radius: 8px 8px 0 0;
+}
+.tab button {
+  background-color: inherit;
+  float: left;
+  border: none;
+  outline: none;
+  cursor: pointer;
+  padding: 14px 16px;
+  transition: 0.3s;
+  font-size: 16px;
+}
+.tab button:hover {
+  background-color: rgba(221, 221, 221, 0.8);
+}
+.tab button.active {
+  background-color: rgba(204, 204, 204, 0.8);
+}
+.tabcontent {
+  display: none;
+  padding: 6px 12px;
+  border: 1px solid #ccc;
+  border-top: none;
+  border-radius: 0 0 8px 8px;
+  background-color: rgba(255, 255, 255, 0.8);
+}
+.generate-button {
+  background-color: #1a73e8;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  margin: 4px 2px;
+  transition-duration: 0.4s;
+  cursor: pointer;
+  border-radius: 5px;
+}
+.generate-button:hover {
+  background-color: #155db1;
+}
+.chat-container {
+  flex-grow: 1;
+  overflow-y: auto;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  background-color: rgba(255, 255, 255, 0.6);
+  border-radius: 8px;
+}
+.message {
+  max-width: 70%;
+  padding: 10px;
+  margin: 5px;
+  border-radius: 20px;
+  word-wrap: break-word;
+}
+.user-message {
+  align-self: flex-end;
+  background-color: rgba(220, 248, 198, 0.8);
+}
+.ai-message {
+  align-self: flex-start;
+  background-color: rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(224, 224, 224, 0.8);
+}
+.input-area {
+  display: flex;
+  padding: 10px;
+  background-color: rgba(240, 242, 245, 0.8);
+  border-top: 1px solid rgba(224, 224, 224, 0.8);
+  border-radius: 0 0 8px 8px;
+}
+#user-input {
+  flex-grow: 1;
+  padding: 10px;
+  border: none;
+  border-radius: 20px;
+  outline: none;
+  font-size: 16px;
+  resize: none;
+  background-color: rgba(255, 255, 255, 0.8);
+}
+#send-button, #reset-button {
+  background-color: #1a73e8;
+  color: white;
+  border: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  margin-left: 10px;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+#send-button:hover, #reset-button:hover {
+  background-color: #155db1;
+}
+.typing-indicator {
+  display: none;
+  align-items: center;
+  column-gap: 6px;
+  padding: 10px;
+}
+.typing-indicator .dot {
+  width: 8px;
+  height: 8px;
+  background-color: #888;
+  border-radius: 50%;
+  animation: typing 1.5s infinite ease-in-out;
+}
+.typing-indicator .dot:nth-child(2) {
+  animation-delay: 0.5s;
+}
+.typing-indicator .dot:nth-child(3) {
+  animation-delay: 1s;
+}
+@keyframes typing {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+.generated-image {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+  margin-top: 10px;
+  cursor: pointer;
+}
+.image-modal {
+  display: none;
+  position: fixed;
+  z-index: 1;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background-color: rgba(0,0,0,0.9);
+}
+.modal-content {
+  margin: auto;
+  display: block;
+  width: 80%;
+  max-width: 700px;
+}
+.close {
+  position: absolute;
+  top: 15px;
+  right: 35px;
+  color: #f1f1f1;
+  font-size: 40px;
+  font-weight: bold;
+  transition: 0.3s;
+}
+.close:hover,
+.close:focus {
+  color: #bbb;
+  text-decoration: none;
+  cursor: pointer;
+}
+#download-button {
+  position: absolute;
+  bottom: 15px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #4CAF50;
+  border: none;
+  color: white;
+  padding: 15px 32px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  margin: 4px 2px;
+  cursor: pointer;
+  border-radius: 5px;
+}
+</style>
+</head>
+<body>
+  <div class="app-container">
+    <div class="app-header">AI角色扮演与图像生成助手</div>
+    
+    <div class="character-card collapsed" id="character-card">
+      <div class="character-card-header" onclick="toggleCharacterCard()">
+        <span class="character-card-title">角色卡生成器</span>
+        <button class="character-card-toggle">▼</button>
+      </div>
+      <div class="character-card-content">
+        <div class="tab">
+          <button class="tablinks" onclick="openTab(event, 'Gender')">性别</button>
+          <button class="tablinks" onclick="openTab(event, 'Personality')">性格</button>
+          <button class="tablinks" onclick="openTab(event, 'Occupation')">职业</button>
+        </div>
+
+        <div id="Gender" class="tabcontent">
+          <select id="gender-select">
+            <option value="无">无</option>
+            <option value="男性">男性</option>
+            <option value="女性">女性</option>
+            <option value="非二元性别">非二元性别</option>
+          </select>
+        </div>
+
+        <div id="Personality" class="tabcontent">
+          <select id="personality-select">
+            <option value="无">无</option>
+            <option value="外向">外向</option>
+            <option value="内向">内向</option>
+            <option value="乐观">乐观</option>
+            <option value="悲观">悲观</option>
+            <option value="自信">自信</option>
+            <option value="谦虚">谦虚</option>
+            <option value="冷静">冷静</option>
+            <option value="热情">热情</option>
+            <option value="理性">理性</option>
+            <option value="感性">感性</option>
+          </select>
+        </div>
+
+        <div id="Occupation" class="tabcontent">
+          <select id="occupation-select">
+            <option value="无">无</option>
+            <option value="学生">学生</option>
+            <option value="教师">教师</option>
+            <option value="医生">医生</option>
+            <option value="工程师">工程师</option>
+            <option value="艺术家">艺术家</option>
+            <option value="作家">作家</option>
+            <option value="企业家">企业家</option>
+            <option value="警察">警察</option>
+            <option value="消防员">消防员</option>
+            <option value="律师">律师</option>
+            <option value="记者">记者</option>
+            <option value="厨师">厨师</option>
+            <option value="运动员">运动员</option>
+            <option value="音乐家">音乐家</option>
+            <option value="演员">演员</option>
+            <option value="科学家">科学家</option>
+            <option value="政治家">政治家</option>
+            <option value="商人">商人</option>
+            <option value="农民">农民</option>
+            <option value="退休人员">退休人员</option>
+          </select>
+        </div>
+
+        <button class="generate-button" onclick="generateCharacter()">生成角色卡</button>
+      </div>
+    </div>
+
+    <div class="chat-container" id="chat-messages"></div>
+    <div class="typing-indicator">
+      <span class="dot"></span>
+      <span class="dot"></span>
+      <span class="dot"></span>
+    </div>
+    <div class="input-area">
+      <button id="reset-button" onclick="resetChat()">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z" fill="white"/>
+        </svg>
+      </button>
+      <textarea id="user-input" placeholder="在此输入您的消息..." rows="1"></textarea>
+      <button id="send-button" onclick="sendMessage()">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" fill="white"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <div id="image-modal" class="image-modal">
+    <span class="close">&times;</span>
+    <img class="modal-content" id="modal-image">
+    <button id="download-button">下载图片</button>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <script>
+    const chatMessages = document.getElementById('chat-messages');
+    const userInput = document.getElementById('user-input');
+    const sendButton = document.getElementById('send-button');
+    const typingIndicator = document.querySelector('.typing-indicator');
+    const modal = document.getElementById('image-modal');
+    const modalImg = document.getElementById('modal-image');
+    const closeBtn = document.getElementsByClassName('close')[0];
+    const downloadBtn = document.getElementById('download-button');
+
+    const API_URL = 'https://api-inference.huggingface.co/models/NousResearch/Nous-Hermes-2-Mixtral-8x7B-DPO';
+    const API_KEY = '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';
+
+    let currentCharacter = {
+      name: "钟兰",
+      gender: "女性",
+      personality: "高冷",
+      occupation: "高中生",
+      appearance: "长发及腰，眼神冷峻，身材修长"
+    };
+
+    async function query(payload) {
+      const response = await axios.post(API_URL, payload, {
+        headers: { Authorization: `Bearer ${API_KEY}` }
+      });
+      return response.data;
+    }
+
+    async function generateImage(prompt) {
+      const response = await fetch(
+        "https://api-inference.huggingface.co/models/jelukas89/nudenip_2",
+        {
+          headers: {
+            Authorization: "Bearer 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",
+            "Content-Type": "application/json",
+          },
+          method: "POST",
+          body: JSON.stringify({ inputs: prompt }),
+        }
+      );
+      const blob = await response.blob();
+      return URL.createObjectURL(blob);
+    }
+
+    function addMessage(content, isUser = false) {
+      const messageDiv = document.createElement('div');
+      messageDiv.className = `message ${isUser ? 'user-message' : 'ai-message'}`;
+      messageDiv.textContent = content;
+      chatMessages.appendChild(messageDiv);
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    function addImage(imageUrl) {
+      const imgElement = document.createElement('img');
+      imgElement.src = imageUrl;
+      imgElement.className = 'generated-image';
+      imgElement.onclick = function() {
+        modal.style.display = "block";
+        modalImg.src = this.src;
+      }
+      chatMessages.appendChild(imgElement);
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    function showTypingIndicator() {
+      typingIndicator.style.display = 'flex';
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    function hideTypingIndicator() {
+      typingIndicator.style.display = 'none';
+    }
+
+    async function translateToEnglish(text) {
+      const prompt = `将以下文本翻译成英文：\n\n${text}\n\n英文翻译：`;
+      const response = await query({ inputs: prompt, parameters: { max_new_tokens: 1000 } });
+      return response[0].generated_text.split('英文翻译：')[1].trim();
+    }
+
+    async function sendMessage() {
+      const userMessage = userInput.value.trim();
+      if (userMessage) {
+        addMessage(userMessage, true);
+        userInput.value = '';
+        showTypingIndicator();
+
+        try {
+          const characterContext = `你正在扮演${currentCharacter.name}，一个${currentCharacter.gender}${currentCharacter.occupation}，性格${currentCharacter.personality}。请以角色的身份回应，将回复限制在1000个字符以内。始终使用用户输入的语言回复。`;
+          const fullPrompt = `${characterContext}\n\n用户: ${userMessage}\n\n${currentCharacter.name}:`;
+          
+          const response = await query({ inputs: fullPrompt, parameters: { max_new_tokens: 1000 } });
+          hideTypingIndicator();
+          const aiResponse = response[0].generated_text.split(`${currentCharacter.name}:`)[1].trim();
+          addMessage(aiResponse);
+
+          if (userMessage.includes('给我一张')) {
+            const imagePromptChinese = `${currentCharacter.name}, ${currentCharacter.appearance}, ${userMessage.split('给我一张')[1]}, 超现实主义摄影`;
+            const imagePromptEnglish = await translateToEnglish(imagePromptChinese);
+            const imageUrl = await generateImage(imagePromptEnglish);
+            addImage(imageUrl);
+            addMessage(`这是根据你的要求生成的图片，描述为："${imagePromptEnglish}"。希望你喜欢！`);
+          }
+        } catch (error) {
+          console.error('错误:', error);
+          hideTypingIndicator();
+          addMessage('抱歉，处理您的请求时出现了错误。');
+        }
+      }
+    }
+
+    sendButton.addEventListener('click', sendMessage);
+    userInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        sendMessage();
+      }
+    });
+
+    function toggleCharacterCard() {
+      const card = document.getElementById('character-card');
+      card.classList.toggle('collapsed');
+      const toggle = card.querySelector('.character-card-toggle');
+      toggle.textContent = card.classList.contains('collapsed') ? '▼' : '▲';
+    }
+
+    function openTab(evt, tabName) {
+      var i, tabcontent, tablinks;
+      tabcontent = document.getElementsByClassName("tabcontent");
+      for (i = 0; i < tabcontent.length; i++) {
+        tabcontent[i].style.display = "none";
+      }
+      tablinks = document.getElementsByClassName("tablinks");
+      for (i = 0; i < tablinks.length; i++) {
+        tablinks[i].className = tablinks[i].className.replace(" active", "");
+      }
+      document.getElementById(tabName).style.display = "block";
+      evt.currentTarget.className += " active";
+    }
+
+    async function generateCharacter() {
+      const gender = document.getElementById('gender-select').value;
+      const personality = document.getElementById('personality-select').value;
+      const occupation = document.getElementById('occupation-select').value;
+
+      if (gender === '无' && personality === '无' && occupation === '无') {
+        alert('请至少选择一个选项');
+        return;
+      }
+
+      const prompt = `生成一个角色卡，包括姓名、年龄、外表描述、性格特点、背景故事和兴趣爱好。
+      性别：${gender !== '无' ? gender : '随机'}
+      性格：${personality !== '无' ? personality : '随机'}
+      职业：${occupation !== '无' ? occupation : '随机'}
+      请生成详细的长相、喜好、经历、性癖等信息，字数在500字左右。`;
+
+      showTypingIndicator();
+
+      try {
+        const response = await query({ inputs: prompt, parameters: { max_new_tokens: 1000 } });
+        hideTypingIndicator();
+        const characterCard = response[0].generated_text.trim();
+        
+        // 更新当前角色
+        currentCharacter = {
+          name: characterCard.split('\n')[0].split('：')[1],
+          gender: gender !== '无' ? gender : '未指定',
+          personality: personality !== '无' ? personality : '未指定',
+          occupation: occupation !== '无' ? occupation : '未指定',
+          appearance: characterCard.split('外表描述：')[1].split('\n')[0]
+        };
+
+        addMessage(`新的角色卡已生成：\n\n${characterCard}`);
+        addMessage(`我现在将以新角色 ${currentCharacter.name} 的身份与你对话。有什么想聊的吗？`);
+      } catch (error) {
+        console.error('生成角色卡时出错:', error);
+        hideTypingIndicator();
+        addMessage('抱歉，生成角色卡时出现了错误。');
+      }
+    }
+
+    function resetChat() {
+      chatMessages.innerHTML = '';
+      addMessage(`你好！我是${currentCharacter.name}，一个${currentCharacter.personality}的${currentCharacter.gender}${currentCharacter.occupation}。今天我能为你做些什么？`);
+    }
+
+    closeBtn.onclick = function() {
+      modal.style.display = "none";
+    }
+
+    downloadBtn.onclick = function() {
+      const link = document.createElement('a');
+      link.href = modalImg.src;
+      link.download = 'generated_image.png';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    window.onclick = function(event) {
+      if (event.target == modal) {
+        modal.style.display = "none";
+      }
+    }
+
+    // 初始问候
+    addMessage(`你好！我是${currentCharacter.name}，一个${currentCharacter.personality}的${currentCharacter.gender}${currentCharacter.occupation}。今天我能为你做些什么？`);
+  </script>
+</body></html>
